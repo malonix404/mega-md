@@ -11,8 +11,8 @@
 [![Version](https://img.shields.io/badge/Version-6.0.0-blue?style=for-the-badge&logo=github)](https://github.com/malonix404/MEGA-MD)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![WhatsApp](https://img.shields.io/badge/Baileys-7.x-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
-[![Stars](https://img.shields.io/github/stars/GlobalTechInfo/MEGA-MD?style=for-the-badge&logo=starship&color=gold)](https://github.com/malonix404/MEGA-MD/stargazers)
-[![Forks](https://img.shields.io/github/forks/GlobalTechInfo/MEGA-MD?style=for-the-badge&logo=git&color=orange)](https://github.com/malonix404/MEGA-MD/network/members)
+[![Stars](https://img.shields.io/github/stars/malonix404/MEGA-MD?style=for-the-badge&logo=starship&color=gold)](https://github.com/malonix404/MEGA-MD/stargazers)
+[![Forks](https://img.shields.io/github/forks/malonix404/MEGA-MD?style=for-the-badge&logo=git&color=orange)](https://github.com/malonix404/MEGA-MD/network/members)
 
 <br/>
 
@@ -128,7 +128,7 @@ npm start
 
 ### Step 1 — Open the session generator
 
-> 🌐 **https://mega-pairing.onrender.com**
+> 🌐 **https://nameless-botpair.onrender.com**
 
 ### Step 2 — Generate your session
 
@@ -150,7 +150,7 @@ npm start
 ### Step 3 — Add to `.env`
 
 ```env
-SESSION_ID=GlobalTechInfo/MEGA-MD_xxxxxxxxxxxxxxxxxxxxxxxx
+SESSION_ID=malonix404/MEGA-MD_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Alternative — Pairing via terminal
@@ -176,14 +176,14 @@ cp sample.env .env
 
 ```env
 # ── REQUIRED (choose one) ────────────────────────────────────
-SESSION_ID=GlobalTechInfo/MEGA-MD_your_gist_id_here
+SESSION_ID=malonix404/MEGA-MD_your_gist_id_here
 
 # ── REQUIRED ─────────────────────────────────────────────────
 OWNER_NUMBER=923000000000        # No + sign
 
 # ── BOT IDENTITY ─────────────────────────────────────────────
 BOT_NAME=MEGA-MD-PRO
-BOT_OWNER=GlobalTechInfo
+BOT_OWNER=malonix404
 PACKNAME=MEGA-MD
 
 # ── BEHAVIOUR ────────────────────────────────────────────────
@@ -231,7 +231,7 @@ npm start
 ### One-Line VPS Installer
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/GlobalTechInfo/MEGA-MD/main/lib/install.sh)
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/install.sh)
 ```
 > [!IMPORTANT]
 > This automatically installs Node.js 20, ffmpeg, libvips, libwebp, PM2, clones the repo, builds it, and sets up data files.
@@ -293,7 +293,7 @@ npm start
 
 **One-line install (recommended):**
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/GlobalTechInfo/MEGA-MD/main/lib/install.sh)
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/install.sh)
 ```
 
 **Manual:**
@@ -354,7 +354,7 @@ npm start
 
    | Key | Value |
    |---|---|
-   | `SESSION_ID` | `GlobalTechInfo/MEGA-MD_your_gist_id` |
+   | `SESSION_ID` | `malonix404/MEGA-MD_your_gist_id` |
    | `OWNER_NUMBER` | `923001234567` |
 
 4. Click **Run**
@@ -378,7 +378,7 @@ npm start
 
 **One-line Deployer:**
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/GlobalTechInfo/MEGA-MD/main/lib/heroku.sh)
+bash <(curl -s https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/heroku.sh)
 ```
 **Manual:**
 ```bash
@@ -386,7 +386,7 @@ heroku login
 heroku create your-bot-name
 heroku stack:set container
 
-heroku config:set SESSION_ID=GlobalTechInfo/MEGA-MD_your_gist_id
+heroku config:set SESSION_ID=malonix404/MEGA-MD_your_gist_id
 heroku config:set OWNER_NUMBER=923001234567
 heroku config:set MONGO_URL=your_mongodb_url   # Recommended
 
@@ -432,7 +432,7 @@ heroku logs --tail
 
    | Key | Value |
    |---|---|
-   | `SESSION_ID` | `GlobalTechInfo/MEGA-MD_your_gist_id` |
+   | `SESSION_ID` | `malonix404/MEGA-MD_your_gist_id` |
    | `OWNER_NUMBER` | `923001234567` |
 
 5. Railway auto-builds via `Dockerfile` and deploys
@@ -461,7 +461,7 @@ heroku logs --tail
 
 **One-line Deployer:**
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/GlobalTechInfo/MEGA-MD/main/lib/fly.sh)
+bash <(curl -s https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/fly.sh)
 ```
 **Manual:**
 ```bash
@@ -469,7 +469,7 @@ curl -L https://fly.io/install.sh | sh
 fly auth login
 
 fly launch --no-deploy
-fly secrets set SESSION_ID=GlobalTechInfo/MEGA-MD_your_gist_id
+fly secrets set SESSION_ID=malonix404/MEGA-MD_your_gist_id
 fly secrets set OWNER_NUMBER=923001234567
 fly deploy
 
@@ -492,7 +492,7 @@ docker build -t mega-md .
 
 # Run
 docker run -d \
-  -e SESSION_ID=GlobalTechInfo/MEGA-MD_your_gist_id \
+  -e SESSION_ID=malonix404/MEGA-MD_your_gist_id \
   -e OWNER_NUMBER=923001234567 \
   -p 5000:5000 \
   --name mega-md \
@@ -559,8 +559,8 @@ DB_URL=./data/baileys.db
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `SESSION_ID` | ✅ *one of* | — | From mega-pairing.onrender.com |
-| `OWNER_NUMBER` | ✅ | `263779778079` | Your number, no `+` |
+| `SESSION_ID` | ✅ *one of* | — | From https://nameless-botpair.onrender.com |
+| `OWNER_NUMBER` | ✅ | `263719741089` | Your number, no `+` |
 | `BOT_NAME` | ❌ | `MEGA-MD` | Bot display name |
 | `BOT_OWNER` | ❌ | `Dev Malone` | Owner display name |
 | `PACKNAME` | ❌ | `MEGA-MD` | Sticker pack name |
@@ -646,7 +646,7 @@ export default {
 ### Bot not connecting
 
 > [!IMPORTANT]
-> - Verify `SESSION_ID` starts with `GlobalTechInfo/MEGA-MD_`
+> - Verify `SESSION_ID` starts with `malonix404/MEGA-MD_`
 > - If using `OWNER_NUMBER`, link within 60 seconds of the code appearing
 > - Reset session and reconnect: `npm run reset-session && npm start`
 
@@ -743,7 +743,7 @@ npm run test:watch      # Watch mode during development
 
 ## 📄 License
 
-[MIT License](LICENSE) · Made with ❤️ by **Dev Malone** · [GlobalTechInfo](https://github.com/malonix404)
+[MIT License](LICENSE) · Made with ❤️ by **Dev Malone** · [malonix404](https://github.com/malonix404)
 
 <div align="center">
 
