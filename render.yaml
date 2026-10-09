@@ -1,8 +1,7 @@
 services:
   - type: web
     name: mega-md
-    runtime: node
-    buildCommand: npm install
+    runtime: docker
     dockerfilePath: lib/Dockerfile
     envVars:
       - key: SESSION_ID
