@@ -34,13 +34,13 @@
     "nodejs-bot",
     "javascript-bot"
   ],
-  "homepage": "https://github.com/malonix404/MEGA-MD",
+  "homepage": "https://github.com/malonix404/mega-md",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/malonix404/MEGA-MD.git"
+    "url": "git+https://github.com/malonix404/mega-md.git"
   },
   "bugs": {
-    "url": "https://github.com/malonix404/MEGA-MD/issues"
+    "url": "https://github.com/malonix404/mega-md/issues"
   },
   "license": "MIT",
   "author": "Dev Malone",

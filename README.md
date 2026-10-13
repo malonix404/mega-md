@@ -8,11 +8,11 @@
 
 <br/>
 
-[![Version](https://img.shields.io/badge/Version-6.0.0-blue?style=for-the-badge&logo=github)](https://github.com/malonix404/MEGA-MD)
+[![Version](https://img.shields.io/badge/Version-6.0.0-blue?style=for-the-badge&logo=github)](https://github.com/malonix404/mega-md)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![WhatsApp](https://img.shields.io/badge/Baileys-7.x-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
-[![Stars](https://img.shields.io/github/stars/malonix404/MEGA-MD?style=for-the-badge&logo=starship&color=gold)](https://github.com/malonix404/MEGA-MD/stargazers)
-[![Forks](https://img.shields.io/github/forks/malonix404/MEGA-MD?style=for-the-badge&logo=git&color=orange)](https://github.com/malonix404/MEGA-MD/network/members)
+[![Stars](https://img.shields.io/github/stars/malonix404/mega-md?style=for-the-badge&logo=starship&color=gold)](https://github.com/malonix404/mega-md/stargazers)
+[![Forks](https://img.shields.io/github/forks/malonix404/mega-md?style=for-the-badge&logo=git&color=orange)](https://github.com/malonix404/mega-md/network/members)
 
 <br/>
 
@@ -112,7 +112,7 @@
 ## ⚡ Quick Start
 
 ```bash
-git clone https://github.com/malonix404/MEGA-MD.git
+git clone https://github.com/malonix404/mega-md.git
 cd MEGA-MD
 npm install
 cp sample.env .env
@@ -214,7 +214,7 @@ DB_URL=                          # SQLite: ./data/baileys.db
 
 ```bash
 # 1. Clone
-git clone https://github.com/malonix404/MEGA-MD.git
+git clone https://github.com/malonix404/mega-md.git
 cd MEGA-MD
 
 # 2. Install dependencies
@@ -231,7 +231,7 @@ npm start
 ### One-Line VPS Installer
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/install.sh)
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/malonix404/mega-md/main/lib/install.sh)
 ```
 > [!IMPORTANT]
 > This automatically installs Node.js 20, ffmpeg, libvips, libwebp, PM2, clones the repo, builds it, and sets up data files.
@@ -263,7 +263,7 @@ apt update && apt upgrade -y
 apt install -y git ffmpeg build-essential libvips-dev webp nodejs npm curl
 
 # Clone and setup
-git clone https://github.com/malonix404/MEGA-MD.git
+git clone https://github.com/malonix404/mega-md.git
 cd MEGA-MD
 npm install
 cp sample.env .env && nano .env
@@ -293,7 +293,7 @@ npm start
 
 **One-line install (recommended):**
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/install.sh)
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/malonix404/mega-md/main/lib/install.sh)
 ```
 
 **Manual:**
@@ -301,7 +301,7 @@ sudo bash <(curl -fsSL https://raw.githubusercontent.com/malonix404/MEGA-MD/main
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs git ffmpeg libvips-dev libwebp-dev build-essential
 
-git clone https://github.com/malonix404/MEGA-MD.git
+git clone https://github.com/malonix404/mega-md.git
 cd MEGA-MD
 npm install
 cp sample.env .env && nano .env
@@ -333,7 +333,7 @@ sudo apt update
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs git ffmpeg libvips-dev libwebp-dev build-essential
 
-git clone https://github.com/malonix404/MEGA-MD.git
+git clone https://github.com/malonix404/mega-md.git
 cd MEGA-MD
 npm install
 cp sample.env .env && nano .env
@@ -349,7 +349,7 @@ npm start
 > The repo includes pre-configured `.replit` and `replit.nix`.
 
 1. Go to [replit.com](https://replit.com) → **Create Repl** → **Import from GitHub**
-2. Paste: `https://github.com/malonix404/MEGA-MD`
+2. Paste: `https://github.com/malonix404/mega-md`
 3. Open **Secrets** tab (🔒) and add:
 
    | Key | Value |
@@ -378,7 +378,7 @@ npm start
 
 **One-line Deployer:**
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/heroku.sh)
+bash <(curl -s https://raw.githubusercontent.com/malonix404/mega-md/main/lib/heroku.sh)
 ```
 **Manual:**
 ```bash
@@ -461,7 +461,7 @@ heroku logs --tail
 
 **One-line Deployer:**
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/malonix404/MEGA-MD/main/lib/fly.sh)
+bash <(curl -s https://raw.githubusercontent.com/malonix404/mega-md/main/lib/fly.sh)
 ```
 **Manual:**
 ```bash
@@ -728,7 +728,7 @@ npm run test:watch      # Watch mode during development
 
 [![Telegram](https://img.shields.io/badge/Telegram-FF0000?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Global_TechInfo)
 [![WhatsApp](https://img.shields.io/badge/WhatsApp_Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://whatsapp.com/channel/0029Vb8QhvR6xCSJ6dLVwL0Z)
-[![GitHub Issues](https://img.shields.io/badge/GitHub_Issues-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/malonix404/MEGA-MD/issues)
+[![GitHub Issues](https://img.shields.io/badge/GitHub_Issues-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/malonix404/mega-md/issues)
 
 </div>
 
