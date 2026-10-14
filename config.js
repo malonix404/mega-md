@@ -16,7 +16,7 @@ const config = {
     timeZone: process.env.TIMEZONE || 'Africa/Harare',
     // Links
     channelLink: process.env.CHANNEL_LINK || 'https://whatsapp.com/channel/0029Vb8QhvR6xCSJ6dLVwL0Z',
-    updateZipUrl: process.env.UPDATE_URL || '',
+    updateZipUrl: process.env.UPDATE_URL || 'https://github.com/malonix404/mega-md/archive/refs/heads/main.zip',
     ytChannel: process.env.YT_CHANNEL || 'GlobalTechInfo',
     // Session
     sessionId: process.env.SESSION_ID || '',
