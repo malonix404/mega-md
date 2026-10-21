@@ -74,7 +74,7 @@ function getStatusRecipients(sock) {
 
 export default {
     command: 'poststatus',
-    aliases: ['statuspost', 'setstatus'],
+    aliases: ['statuspost', 'tostatus', 'setstatus'],
     category: 'owner',
     description: 'Publish text, photo, or video WhatsApp Status',
     usage: '.poststatus <text> or reply to a photo/video',

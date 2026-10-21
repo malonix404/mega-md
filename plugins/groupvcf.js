@@ -1,7 +1,7 @@
 export default {
     command: 'groupvcf',
     aliases: ['gvcf', 'vcf', 'groupcontacts'],
-    category: 'tools',
+    category: 'group',
     description: 'Export group participants as a VCF contact file',
     usage: '.groupvcf',
     ownerOnly: true,
