@@ -1,14 +1,13 @@
-
 import yts from 'yt-search';
 import axios from 'axios';
 
 const DL_API = 'https://api.qasimdev.dpdns.org/api/loaderto/download';
 const API_KEY = 'qasim-dev';
 
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 const downloadWithRetry = async (url, retries = 3) => {
-    for (let i = 0; i < retries; i++) {
+    let lastError;
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const { data } = await axios.get(DL_API, {
                 params: {
@@ -16,193 +15,90 @@ const downloadWithRetry = async (url, retries = 3) => {
                     format: 'mp3',
                     url
                 },
-                timeout: 90000
+                timeout: 120000
             });
 
-            if (data?.data?.downloadUrl) {
-                return data.data;
+            const downloadUrl = data?.data?.downloadUrl;
+
+            if (!downloadUrl) {
+                throw new Error('Download API returned no download URL.');
             }
 
-            throw new Error('No download URL returned by API');
-        } catch (err) {
-            if (i === retries - 1) throw err;
-
-            console.log(
-                `Download attempt ${i + 1} failed. Retrying in 5 seconds...`
-            );
-
-            await wait(5000);
+            return downloadUrl;
+        } catch (error) {
+            lastError = error;
+            if (attempt < retries) {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
         }
     }
 
-    throw new Error('All download attempts failed');
+    throw lastError;
 };
 
 export default {
     command: 'play',
-    aliases: ['plays', 'music'],
-    category: 'music',
-    description: 'Search music and download as audio or document',
+    aliases: ['mp3doc', 'musicdoc'],
+    category: 'downloader',
+    description: 'Search and send music directly as an audio document',
     usage: '.play <song name>',
+    ownerOnly: false,
+    groupOnly: false,
+    adminOnly: false,
+    isPrefixless: false,
+    cooldown: 5,
 
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
-
-        // Button IDs can be routed back through this command:
-        // .play <youtube-url> audio
-        // .play <youtube-url> document
-        let query = args.join(' ').trim();
-        let format = 'choose';
-
-        const lastArg = args[args.length - 1]?.toLowerCase();
-
-        if (lastArg === 'audio' || lastArg === 'document') {
-            format = lastArg;
-            query = args.slice(0, -1).join(' ').trim();
-        }
+        const query = args.join(' ').trim();
 
         if (!query) {
-            return sock.sendMessage(chatId, {
-                text: '*Which song do you want to download?*\n\nUsage: .play <song name>'
-            }, { quoted: message });
+            return sock.sendMessage(
+                chatId,
+                { text: 'Usage: .play Alan Walker Faded' },
+                { quoted: message }
+            );
         }
 
         try {
-            let video;
+            // Search for the requested song.
+            const search = await yts(query);
+            const song = search.videos?.[0];
 
-            // If a button supplied a YouTube URL, use it directly.
-            if (/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(query)) {
-                const result = await yts({ videoId: getVideoId(query) });
-                video = result;
-            } else {
-                await sock.sendMessage(chatId, {
-                    text: '🔍 *Searching for your song...*'
-                }, { quoted: message });
-
-                const { videos } = await yts(query);
-
-                if (!videos?.length) {
-                    return sock.sendMessage(chatId, {
-                        text: '❌ *No results found!*'
-                    }, { quoted: message });
-                }
-
-                video = videos[0];
+            if (!song) {
+                return sock.sendMessage(
+                    chatId,
+                    { text: 'No matching song was found.' },
+                    { quoted: message }
+                );
             }
 
-            if (!video?.url) {
-                throw new Error('Could not retrieve video information');
-            }
+            // Obtain the MP3 download URL.
+            const fileUrl = await downloadWithRetry(song.url);
 
-            if (format === 'choose') {
-                // Each button ID contains a command that the bot's
-                // message dispatcher must recognize when clicked.
-                return sock.sendMessage(chatId, {
-                    text:
-                        `🎵 *${video.title}*\n\n` +
-                        `👤 Artist/Channel: ${video.author?.name || 'Unknown'}\n` +
-                        `⏱️ Duration: ${video.timestamp || 'Unknown'}\n\n` +
-                        '*Choose your download format:*',
-                    footer: 'MEGA MD • Music Downloader',
-                    buttons: [
-                        {
-                            buttonId: `.play ${video.url} audio`,
-                            buttonText: { displayText: '🎧 Audio' },
-                            type: 1
-                        },
-                        {
-                            buttonId: `.play ${video.url} document`,
-                            buttonText: { displayText: '📁 Document' },
-                            type: 1
-                        }
-                    ],
-                    headerType: 1
-                }, { quoted: message });
-            }
+            // Send directly as a document: no caption or thumbnail.
+            const safeTitle = (song.title || query)
+                .replace(/[\\/:*?"<>|]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .slice(0, 150) || 'music';
 
             await sock.sendMessage(chatId, {
-                text: `⏳ *Preparing ${format === 'audio' ? 'audio' : 'document'}...*\n\n🎵 ${video.title}`
-            }, { quoted: message });
+                document: { url: fileUrl },
+                mimetype: 'audio/mpeg',
+                fileName: `${safeTitle}.mp3`
+            });
 
-            const songData = await downloadWithRetry(video.url);
+        } catch (error) {
+            console.error('[PLAY ERROR]', error);
 
-            const safeTitle = (songData.title || video.title || 'music')
-                .replace(/[\\/:*?"<>|]/g, '_')
-                .trim();
-
-            const fileUrl = songData.downloadUrl;
-
-            if (format === 'document') {
-                await sock.sendMessage(chatId, {
-                    document: { url: fileUrl },
-                    mimetype: 'audio/mpeg',
-                    fileName: `${safeTitle}.mp3`,
-                    caption: `📁 *${safeTitle}*\n🎵 Downloaded by MEGA MD`
-                }, { quoted: message });
-            } else {
-                let thumbnailBuffer;
-
-                try {
-                    if (songData.thumbnail) {
-                        const img = await axios.get(songData.thumbnail, {
-                            responseType: 'arraybuffer',
-                            timeout: 15000
-                        });
-
-                        thumbnailBuffer = Buffer.from(img.data);
-                    }
-                } catch {
-                    // Thumbnail is optional.
-                }
-
-                await sock.sendMessage(chatId, {
-                    audio: { url: fileUrl },
-                    mimetype: 'audio/mpeg',
-                    fileName: `${safeTitle}.mp3`,
-                    contextInfo: {
-                        externalAdReply: {
-                            title: safeTitle,
-                            body: `${video.author?.name || 'Unknown'} • ${video.timestamp || ''}`,
-                            ...(thumbnailBuffer
-                                ? { thumbnail: thumbnailBuffer }
-                                : {}),
-                            mediaType: 2,
-                            sourceUrl: video.url
-                        }
-                    }
-                }, { quoted: message });
-            }
-        } catch (err) {
-            console.error('Play error:', err.message);
-
-            const reason = err.response?.status === 408
-                ? 'Download timed out. Try again.'
-                : err.response?.status === 429
-                    ? 'Too many requests. Please wait a minute.'
-                    : 'Unable to download this song. Please try again.';
-
-            await sock.sendMessage(chatId, {
-                text: `❌ *Download failed:* ${reason}`
-            }, { quoted: message });
+            await sock.sendMessage(
+                chatId,
+                {
+                    text: 'Failed to download the song. Please try again later.'
+                },
+                { quoted: message }
+            );
         }
     }
 };
-
-function getVideoId(url) {
-    try {
-        const parsed = new URL(url);
-
-        if (parsed.hostname.endsWith('youtu.be')) {
-            return parsed.pathname.slice(1);
-        }
-
-        if (parsed.pathname === '/watch') {
-            return parsed.searchParams.get('v');
-        }
-
-        const match = parsed.pathname.match(/\/(?:shorts|embed)\/([^/?]+)/);
-        return match?.[1] || '';
-    } catch {
-        return '';
-    }
-}
