@@ -43,6 +43,12 @@ export default {
     category: 'download',
     description: 'Download songs from YouTube as MP3',
     usage: '.song <song name | YouTube link>',
+    
+    ownerOnly: false,
+    groupOnly: false,
+    adminOnly: false,
+    isPrefixless: true,
+    cooldown: 5,
 
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
@@ -117,15 +123,16 @@ export default {
             const uploaded = details.ago || video.ago || 'Unknown';
 
             const caption =
-                '╭━━━〔 *MEGA MUSIC* 〕━━━╮\n\n' +
-                `🎵 *Title:* ${title}\n` +
-                `👁️ *Views:* ${views}\n` +
-                `⏱️ *Duration:* ${duration}\n` +
-                `📅 *Uploaded:* ${uploaded}\n\n` +
-                `🔗 *YouTube:* ${videoUrl}\n\n` +
-                '⬇️ Preparing your MP3 download...\n\n' +
-                '╰━━━━━━━━━━━━━━━━━━╯\n' +
-                '_Powered by DEV MALONE INC_';
+                '╭━━━━━━━━━\n' +
+                `┃ MEGA MUSIC - DOWNLOADER\n\n` +
+                `> *ᴛɪᴛʟᴇ:* ${title}\n\n` +
+                `┃ *ᴠɪᴇᴡs:* ${views}\n` +
+                `┃ *ᴅᴜʀᴀᴛɪᴏɴ:* ${duration}\n` +
+                `┃ *ᴜᴘʟᴏᴀᴅᴇᴅ:* ${uploaded}\n\n` +
+                `> *ᴜʀʟ:* ${videoUrl}\n\n` +
+                '┃ *Enjoy your music®*\n' +
+                '╰━━━━━━━━━━━━━━━━━━┈⊷\n' +
+                '> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴅᴇᴠᴍᴀʟᴏɴᴇ ɪɴᴄ©*';
 
             const buttons = [
                 {

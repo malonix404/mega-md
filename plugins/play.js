@@ -155,8 +155,8 @@ export default {
     ownerOnly: false,
     groupOnly: false,
     adminOnly: false,
-    isPrefixless: false,
-    cooldown: 10,
+    isPrefixless: true,
+    cooldown: 5,
 
     async handler(sock, message, args, context = {}) {
         const chatId = context.chatId || message?.key?.remoteJid;
