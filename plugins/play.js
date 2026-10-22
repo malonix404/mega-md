@@ -1,52 +1,50 @@
+
 import yts from 'yt-search';
 import axios from 'axios';
 
 const DL_API = 'https://api.qasimdev.dpdns.org/api/loaderto/download';
 const API_KEY = 'qasim-dev';
 
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const downloadWithRetry = async (url, retries = 3) => {
     let lastError;
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            const { data } = await axios.get(DL_API, {
-                params: {
-                    apiKey: API_KEY,
-                    format: 'mp3',
-                    url
-                },
-                timeout: 120000
+            const response = await axios.get(url, {
+                responseType: 'arraybuffer',
+                timeout: 120000,
+                maxContentLength: 100 * 1024 * 1024,
+                maxBodyLength: 100 * 1024 * 1024,
+                validateStatus: status => status >= 200 && status < 300
             });
 
-            const downloadUrl = data?.data?.downloadUrl;
-
-            if (!downloadUrl) {
-                throw new Error('Download API returned no download URL.');
-            }
-
-            return downloadUrl;
+            return Buffer.from(response.data);
         } catch (error) {
             lastError = error;
+
             if (attempt < retries) {
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await wait(attempt * 1500);
             }
         }
     }
 
-    throw lastError;
+    throw lastError || new Error('Download failed after retries.');
 };
 
 export default {
     command: 'play',
     aliases: ['mp3doc', 'musicdoc'],
-    category: 'downloader',
-    description: 'Search and send music directly as an audio document',
+    category: 'download',
+    description: 'Search for a song and send it as an audio document.',
     usage: '.play <song name>',
+
     ownerOnly: false,
     groupOnly: false,
     adminOnly: false,
     isPrefixless: false,
-    cooldown: 5,
+    cooldown: 10,
 
     async handler(sock, message, args, context) {
         const chatId = context.chatId || message.key.remoteJid;
@@ -61,47 +59,85 @@ export default {
         }
 
         try {
-            // Search for the requested song.
+            // Search YouTube
             const search = await yts(query);
-            const song = search.videos?.[0];
+            const video = search.videos?.[0];
 
-            if (!song) {
+            if (!video) {
                 return sock.sendMessage(
                     chatId,
-                    { text: 'No matching song was found.' },
+                    { text: 'No matching song was found. Try another search.' },
                     { quoted: message }
                 );
             }
 
-            // Obtain the MP3 download URL.
-            const fileUrl = await downloadWithRetry(song.url);
-
-            // Send directly as a document: no caption or thumbnail.
-            const safeTitle = (song.title || query)
-                .replace(/[\\/:*?"<>|]/g, '')
-                .replace(/\s+/g, ' ')
-                .trim()
-                .slice(0, 150) || 'music';
-
-            await sock.sendMessage(chatId, {
-                document: { url: fileUrl },
-                mimetype: 'audio/mpeg',
-                fileName: `${safeTitle}.mp3`
-            };
-            {
-                quoted: message
+            if (!video.url || !/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(video.url)) {
+                throw new Error('Invalid video URL returned by search.');
             }
-        );
+
+            // Request the audio download from the API
+            const apiResponse = await axios.get(DL_API, {
+                params: {
+                    url: video.url,
+                    apikey: API_KEY,
+                    key: API_KEY,
+                    format: 'mp3'
+                },
+                timeout: 60000,
+                validateStatus: status => status >= 200 && status < 300
+            });
+
+            const data = apiResponse.data;
+
+            // Support common API response structures
+            const downloadUrl =
+                typeof data === 'string'
+                    ? data
+                    : data?.result?.downloadUrl ||
+                      data?.result?.download_url ||
+                      data?.result?.url ||
+                      data?.downloadUrl ||
+                      data?.download_url ||
+                      data?.url ||
+                      data?.link;
+
+            if (!downloadUrl || typeof downloadUrl !== 'string') {
+                throw new Error(
+                    data?.message || 'The download API did not return a download URL.'
+                );
+            }
+
+            if (!/^https?:\/\//i.test(downloadUrl)) {
+                throw new Error('The API returned an invalid download URL.');
+            }
+
+            // Download the actual audio file
+            const audioBuffer = await downloadWithRetry(downloadUrl);
+
+            if (!audioBuffer.length) {
+                throw new Error('The downloaded audio file is empty.');
+            }
+
+            // Send directly as a document: no caption and no thumbnail
+            await sock.sendMessage(chatId, {
+                document: audioBuffer,
+                mimetype: 'audio/mpeg',
+                fileName: `${video.title.replace(/[\\/:*?"<>|]/g, '_').slice(0, 150)}.mp3`
+            }, {
+                quoted: message
+            });
 
         } catch (error) {
-            console.error('[PLAY ERROR]', error);
+            console.error('[PLAY ERROR]', error?.response?.data || error.message);
 
             await sock.sendMessage(
                 chatId,
                 {
-                    text: 'Failed to download the song. Please try again later.'
+                    text: 'Unable to download this song right now. Please try again later.'
                 },
-                { quoted: message }
+                {
+                    quoted: message
+                }
             );
         }
     }
