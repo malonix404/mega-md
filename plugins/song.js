@@ -183,15 +183,6 @@ export default {
                 },
                 { quoted: message }
             );
-
-            await sock.sendMessage(
-                chatId,
-                {
-                    text: '✅ *MP3 download complete!*\n\nEnjoy your music 🎧',
-                    footer: 'DEV MALONE INC'
-                },
-                { quoted: message }
-            );
         } catch (err) {
             console.error('Song plugin error:', err);
 
