@@ -87,7 +87,11 @@ export default {
                 document: { url: fileUrl },
                 mimetype: 'audio/mpeg',
                 fileName: `${safeTitle}.mp3`
-            });
+            };
+            {
+                quoted: message
+            }
+        );
 
         } catch (error) {
             console.error('[PLAY ERROR]', error);
