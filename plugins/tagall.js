@@ -4,6 +4,7 @@ export default {
     category: 'group',
     description: 'Tag all group members with their usernames',
     usage: '.tagall',
+    ownerOnly: true,
     groupOnly: true,
     adminOnly: true,
     async handler(sock, message, args, context) {
