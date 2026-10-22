@@ -48,7 +48,7 @@ export default {
             if (video.thumbnail) {
                 await sock.sendMessage(chatId, {
                     image: { url: video.thumbnail },
-                    caption: `╭━━━━━━━━━\n┃ *MEGA MUSIC - DOWNLOADER*\n\n> *ᴛɪᴛʟᴇ:* ${video.title}\n\n┃ *ᴠɪᴇᴡꜱ:* ${video.views}\n┃ *ᴅᴜʀᴀᴛɪᴏɴ:* ${video.timestamp}\n┃ *ᴜᴘʟᴏᴀᴅᴇᴅ:* ${video.ago}\n\n> *ᴜʀʟ:* ${videoUrl}\n\n┃ *Enjoy your music®*\n╰━━━━━━━━━━━━━━━━━━┈⊷\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴍᴇɢᴀ ᴍᴜsɪᴄ*`
+                    caption: `╭━━━━━━━━━\n┃ *MEGA MUSIC - DOWNLOADER*\n\n> *ᴛɪᴛʟᴇ:* ${video.title || query}\n\n┃ *ᴠɪᴇᴡꜱ:* ${video.views || ''}\n┃ *ᴅᴜʀᴀᴛɪᴏɴ:* ${video.timestamp || ''}\n┃ *ᴜᴘʟᴏᴀᴅᴇᴅ:* ${video.ago || ''}\n\n> *ᴜʀʟ:* ${videoUrl || ''}\n\n┃ *Enjoy your music®*\n╰━━━━━━━━━━━━━━━━━━┈⊷\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴍᴇɢᴀ ᴍᴜsɪᴄ*`
                 }, { quoted: message });
             }
             const audio = await downloadWithRetry(video.url);
