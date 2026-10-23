@@ -111,11 +111,12 @@ const menuStyles = [
             t += `┣❐ *ᴘʀᴇғɪxᴇs:* ${info.prefix}\n`;
             t += `┣❐ *ᴘʟᴜɢɪɴs:* ${info.total}\n`;
             t += `┣❐ *ᴠᴇʀsɪᴏɴ:* ${info.version}\n`;
+            t += `┣❐ *ᴏᴡɴᴇʀ:* Malone\n`;
             t += `┣❐ *ʟᴏᴄᴀᴛɪᴏɴ:* ${info.timezone}\n`;
             t += `┣❐ *ᴛɪᴍᴇ:* ${info.time}\n`;
-            t += `┗━❐\n`;
+            t += `┗━❐\n\n`;
             for (const [cat, cmds] of categories) {
-                t += `\━━❍「 *${cat.toUpperCase()}* 」❍━━\n\n`;
+                t += `\n━━❍「 *${cat.toUpperCase()}* 」❍━━\n\n`;
                 for (const c of cmds)
                     t += `┃𖥟╾ ${prefix}${c}\n`;
             }
