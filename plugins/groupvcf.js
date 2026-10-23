@@ -1,106 +1,128 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { randomUUID } from 'crypto';
 
 export default {
     command: 'vcf',
     aliases: ['groupvcf', 'savecontacts'],
     category: 'tools',
-    description: 'Export group participants as a VCF contacts file',
+    description: 'Export verified group phone contacts to VCF',
     usage: '.vcf',
 
     ownerOnly: false,
     groupOnly: true,
     adminOnly: false,
-    isPrefixless: true,
+    isPrefixless: false,
     cooldown: 5,
 
     async handler(sock, message, args = [], context = {}) {
         const chatId = context.chatId || message?.key?.remoteJid;
         const channelInfo = context.channelInfo || {};
 
-        const reply = async (text) => {
-            return sock.sendMessage(
+        if (!chatId || !message) return;
+
+        const reply = async (text) =>
+            sock.sendMessage(
                 chatId,
                 { text, ...channelInfo },
                 { quoted: message }
             );
-        };
 
-        if (!chatId || !message) return;
-
-        // Group-only check; no owner or admin restriction.
-        const isGroup =
-            context.isGroup ??
-            chatId.endsWith('@g.us');
-
-        if (!isGroup) {
-            return reply(
-                '❌ *GROUP ONLY*\n\n' +
-                'Use this command inside a WhatsApp group.'
-            );
+        if (!(context.isGroup ?? chatId.endsWith('@g.us'))) {
+            return reply('❌ This command can only be used in groups.');
         }
 
         let filePath;
 
         try {
-            await reply(
-                '⏳ *MEGA MD VCF EXPORTER*\n\n' +
-                'Collecting group participants and preparing contacts...'
-            );
-
             const metadata = await sock.groupMetadata(chatId);
             const participants = metadata.participants || [];
 
-            if (participants.length === 0) {
+            if (!participants.length) {
                 return reply('❌ No group participants were found.');
             }
 
-            const cards = participants
-                .map((participant, index) => {
-                    // Support common Baileys participant JID properties.
-                    const jid =
-                        participant.id ||
-                        participant.jid ||
-                        participant.lid;
+            await reply('⏳ Resolving real participant phone numbers...');
 
-                    if (!jid) return null;
+            const contacts = [];
+            const seen = new Set();
+            let skipped = 0;
 
-                    const number = jid.split('@')[0];
+            for (const participant of participants) {
+                // Do not mistake a LID for a phone number.
+                const id = participant.id || participant.jid || '';
 
-                    // Escape special characters in vCard text values.
-                    const name = `Group Contact ${index + 1} +${number}`
-                        .replace(/\\/g, '\\\\')
-                        .replace(/\n/g, '\\n')
-                        .replace(/,/g, '\\,')
-                        .replace(/;/g, '\\;');
+                let phoneJid = '';
 
-                    return [
-                        'BEGIN:VCARD',
-                        'VERSION:3.0',
-                        `FN:${name}`,
-                        `TEL;TYPE=CELL;waid=${number}:+${number}`,
-                        'END:VCARD'
-                    ].join('\r\n');
-                })
-                .filter(Boolean);
+                // Already a phone-number JID.
+                if (/^\d+@s\.whatsapp\.net$/.test(id)) {
+                    phoneJid = id;
+                } else {
+                    // Resolve LID using Baileys' mapping, when available.
+                    const mapping = sock.signalRepository?.lidMapping;
 
-            if (cards.length === 0) {
-                return reply('❌ No usable participant contacts were found.');
+                    if (
+                        id.endsWith('@lid') &&
+                        typeof mapping?.getPNForLID === 'function'
+                    ) {
+                        try {
+                            const resolved = await mapping.getPNForLID(id);
+
+                            if (
+                                typeof resolved === 'string' &&
+                                /^\d+@s\.whatsapp\.net$/.test(resolved)
+                            ) {
+                                phoneJid = resolved;
+                            }
+                        } catch (error) {
+                            console.warn(
+                                '[VCF] Could not resolve participant LID:',
+                                id
+                            );
+                        }
+                    }
+                }
+
+                if (!phoneJid) {
+                    skipped++;
+                    continue;
+                }
+
+                const number = phoneJid.split('@')[0];
+
+                if (seen.has(number)) continue;
+                seen.add(number);
+
+                const name = `WhatsApp Contact ${contacts.length + 1}`;
+
+                contacts.push([
+                    'BEGIN:VCARD',
+                    'VERSION:3.0',
+                    `FN:${name}`,
+                    `TEL;TYPE=CELL;waid=${number}:+${number}`,
+                    'END:VCARD'
+                ].join('\r\n'));
             }
 
-            // Unique filename prevents simultaneous requests overwriting files.
+            if (!contacts.length) {
+                return reply(
+                    '❌ No verified phone numbers were available.\n\n' +
+                    'Baileys may only have LIDs for these participants. ' +
+                    'The command skipped them rather than exporting incorrect numbers.'
+                );
+            }
+
             const tempDir = path.resolve('./temp');
             await fs.mkdir(tempDir, { recursive: true });
 
             filePath = path.join(
                 tempDir,
-                `group-contacts-${Date.now()}-${Math.random()
-                    .toString(36).slice(2, 8)}.vcf`
+                `vcf-${randomUUID()}.vcf`
             );
 
             await fs.writeFile(
                 filePath,
-                cards.join('\r\n') + '\r\n',
+                contacts.join('\r\n') + '\r\n',
                 'utf8'
             );
 
@@ -111,30 +133,20 @@ export default {
                     mimetype: 'text/vcard',
                     fileName: 'MEGA-MD-Group-Contacts.vcf',
                     caption:
-                        '📇 *MEGA MD CONTACT EXPORT*\n\n' +
+                        '📇 *MEGA MD — GROUP CONTACTS*\n\n' +
                         `👥 Group: ${metadata.subject || 'WhatsApp Group'}\n` +
-                        `📱 Contacts: ${cards.length}\n\n` +
-                        'Import the VCF file into your contacts app.'
+                        `✅ Verified contacts: ${contacts.length}\n` +
+                        `⏭️ Unresolved participants skipped: ${skipped}\n\n` +
+                        'Import the file into your contacts app.'
                 },
-                {
-                    quoted: message,
-                    ...(typeof metadata.ephemeralDuration === 'number'
-                        ? { ephemeralExpiration: metadata.ephemeralDuration }
-                        : {})
-                }
-            );
-
-            console.log(
-                `[VCF] Exported ${cards.length} contacts for ${chatId}`
+                { quoted: message }
             );
 
         } catch (error) {
             console.error('[VCF] Export failed:', error);
 
             await reply(
-                '❌ *VCF EXPORT FAILED*\n\n' +
-                'Could not generate or send the contacts file. ' +
-                'Please try again later.'
+                '❌ Failed to generate the VCF file. Please try again.'
             ).catch(() => {});
 
         } finally {
