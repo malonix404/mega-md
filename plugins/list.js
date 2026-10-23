@@ -34,6 +34,7 @@ const menuStyles = [
             t += `┃ 🔧 *Prefix:* ${info.prefix}\n`;
             t += `┃ 📦 *Plugin:* ${info.total}\n`;
             t += `┃ 💎 *Version:* ${info.version}\n`;
+            t += `┃ 📡 *Status:* Online\n`;
             t += `┃ ☘️ *Location:* ${info.timezone}\n`;
             t += `┃ ⏰ *Time:* ${info.time}\n`;
             t += `╰━━━━━━━⬣\n`;
@@ -52,6 +53,7 @@ const menuStyles = [
             t += `├• 🌟 *Bot:* ${info.bot}\n`;
             t += `├• ⚙️ *Prefix:* ${info.prefix}\n`;
             t += `├• 🍫 *Plugins:* ${info.total}\n`;
+            t += `├• 🐺 *Status:* Online\n`;
             t += `├• 💎 *Version:* ${info.version}\n`;
             t += `├• 🚀 *Location:* ${info.timezone}\n`;
             t += `├• ⏰ *Time:* ${info.time}\n`;
@@ -71,10 +73,12 @@ const menuStyles = [
             t += `┃❍ *Bot :* ${info.bot}\n`;
             t += `┃❍ *Prefixes:* ${info.prefix}\n`;
             t += `┃❍ *Plugins:* ${info.total}\n`;
+            t += `┃❍ *Status:* Active\n`;
+            t += `┃❍ *Owner:* Malone\n`;
             t += `┃❍ *Version:* ${info.version}\n`;
             t += `┃❍ *Location:* ${info.timezone}\n`;
             t += `┃❍ *Time:* ${info.time}\n`;
-            t += `╰━━━━━━━━━♡⃝🦋\n`;
+            t += `╰━━━━━━♡⃝🦋\n`;
             for (const [cat, cmds] of categories) {
                 t += `\n◈════〔 *${cat.toUpperCase()}* 〕════◈\n\n`;
                 for (const c of cmds)
@@ -131,7 +135,8 @@ const menuStyles = [
             t += `┃ ℹ️ *Prefixes:* ${info.prefix}\n`;
             t += `┃ 📊 *Plugins:* ${info.total}\n`;
             t += `┃ 🔖 *Version:* ${info.version}\n`;
-            t += `┃ 🦊 *Location:* ${info.timezone}\n`;
+            t += `┃ 🚀 *Status:* Active\n`;
+            t += `┃ 🐿️ *Location:* ${info.timezone}\n`;
             t += `┃ ⏰ *Time:* ${info.time}\n`;
             t += `╰─❏\n`;
             for (const [cat, cmds] of categories) {
@@ -146,12 +151,13 @@ const menuStyles = [
     {
         render({ _title, info, categories, prefix }) {
             let t = `┏━━━『 *MEGA MENU* 』━━⊚\n`;
-            t += `┣⊚ *Bot: ${info.bot}*\n`;
-            t += `┣⊚ *Prefixes: ${info.prefix}*\n`;
-            t += `┣⊚ *Plugins: ${info.total}*\n`;
-            t += `┣⊚ *Version: ${info.version}*\n`;
+            t += `┣⊚ *Bot:* ${info.bot}\n`;
+            t += `┣⊚ *Prefixes:* ${info.prefix}\n`;
+            t += `┣⊚ *Plugins:* ${info.total}\n`;
+            t += `┣⊚ *Version:* ${info.version}\n`;
+            t += `┣⊚ *Status:* Online\n`;
             t += `┣⊚ *Location:* ${info.timezone}\n`;
-            t += `┣⊚ *Time: ${info.time}*\n`;
+            t += `┣⊚ *Time:* ${info.time}\n`;
             t += `┗━━━⊚\n`;
             for (const [cat, cmds] of categories) {
                 t += `\n───⬣ *${cat.toUpperCase()}* ⬣──\n\n`;
@@ -166,11 +172,12 @@ const menuStyles = [
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 export default {
     command: 'menu',
-    aliases: ['help', 'commands', 'malone', 'list'],
+    aliases: ['help', 'commands', 'mega', 'list'],
     category: 'general',
     description: 'Show all commands',
     usage: '.menu [command]',
     isPrefixless: true,
+    
     async handler(sock, message, args, context) {
         const { chatId, channelInfo } = context;
         const prefix = config.prefixes[0];
