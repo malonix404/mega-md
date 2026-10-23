@@ -1,3 +1,4 @@
+
 import fs from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -12,7 +13,7 @@ export default {
     ownerOnly: false,
     groupOnly: true,
     adminOnly: false,
-    isPrefixless: false,
+    isPrefixless: true,
     cooldown: 5,
 
     async handler(sock, message, args = [], context = {}) {
@@ -21,7 +22,7 @@ export default {
 
         if (!chatId || !message) return;
 
-        const reply = async (text) =>
+        const reply = (text) =>
             sock.sendMessage(
                 chatId,
                 { text, ...channelInfo },
@@ -29,7 +30,7 @@ export default {
             );
 
         if (!(context.isGroup ?? chatId.endsWith('@g.us'))) {
-            return reply('❌ This command can only be used in groups.');
+            return reply('❌ This command only works in groups.');
         }
 
         let filePath;
@@ -42,30 +43,31 @@ export default {
                 return reply('❌ No group participants were found.');
             }
 
-            await reply('⏳ Resolving real participant phone numbers...');
-
+            const mapping = sock.signalRepository?.lidMapping;
             const contacts = [];
             const seen = new Set();
             let skipped = 0;
 
             for (const participant of participants) {
-                // Do not mistake a LID for a phone number.
                 const id = participant.id || participant.jid || '';
+                const possibleJids = [
+                    participant.phoneNumber,
+                    participant.phone_number,
+                    participant.pn,
+                    participant.id,
+                    participant.jid
+                ];
 
-                let phoneJid = '';
+                let phoneJid = possibleJids.find(
+                    (jid) =>
+                        typeof jid === 'string' &&
+                        /^\d+@s\.whatsapp\.net$/.test(jid)
+                );
 
-                // Already a phone-number JID.
-                if (/^\d+@s\.whatsapp\.net$/.test(id)) {
-                    phoneJid = id;
-                } else {
-                    // Resolve LID using Baileys' mapping, when available.
-                    const mapping = sock.signalRepository?.lidMapping;
-
-                    if (
-                        id.endsWith('@lid') &&
-                        typeof mapping?.getPNForLID === 'function'
-                    ) {
-                        try {
+                // Resolve a LID only through Baileys' mapping API.
+                if (!phoneJid && id.endsWith('@lid')) {
+                    try {
+                        if (typeof mapping?.getPNForLID === 'function') {
                             const resolved = await mapping.getPNForLID(id);
 
                             if (
@@ -74,12 +76,12 @@ export default {
                             ) {
                                 phoneJid = resolved;
                             }
-                        } catch (error) {
-                            console.warn(
-                                '[VCF] Could not resolve participant LID:',
-                                id
-                            );
                         }
+                    } catch (error) {
+                        console.warn(
+                            '[VCF] LID resolution failed:',
+                            error?.message || error
+                        );
                     }
                 }
 
@@ -93,32 +95,46 @@ export default {
                 if (seen.has(number)) continue;
                 seen.add(number);
 
-                const name = `WhatsApp Contact ${contacts.length + 1}`;
+                // Use the participant's WhatsApp push name if available.
+                const displayName = String(
+                    participant.name ||
+                    participant.notify ||
+                    participant.verifiedName ||
+                    `WhatsApp Contact ${contacts.length + 1}`
+                ).replace(/[\r\n]/g, ' ').replace(/[,;]/g, ' ');
 
                 contacts.push([
                     'BEGIN:VCARD',
                     'VERSION:3.0',
-                    `FN:${name}`,
+                    `FN:${displayName}`,
                     `TEL;TYPE=CELL;waid=${number}:+${number}`,
                     'END:VCARD'
                 ].join('\r\n'));
             }
 
             if (!contacts.length) {
+                console.warn('[VCF] No phone JIDs resolved.', {
+                    participantCount: participants.length,
+                    sample: participants.slice(0, 3).map(p => ({
+                        id: p.id,
+                        phoneNumber: p.phoneNumber,
+                        lid: p.lid
+                    })),
+                    hasLidMapping: Boolean(mapping),
+                    hasGetPNForLID:
+                        typeof mapping?.getPNForLID === 'function'
+                });
+
                 return reply(
-                    '❌ No verified phone numbers were available.\n\n' +
-                    'Baileys may only have LIDs for these participants. ' +
-                    'The command skipped them rather than exporting incorrect numbers.'
+                    '❌ Baileys did not provide any verified phone numbers ' +
+                    'for this group. Check the MEGA MD console for the [VCF] ' +
+                    'diagnostic output. No fake numbers were exported.'
                 );
             }
 
             const tempDir = path.resolve('./temp');
             await fs.mkdir(tempDir, { recursive: true });
-
-            filePath = path.join(
-                tempDir,
-                `vcf-${randomUUID()}.vcf`
-            );
+            filePath = path.join(tempDir, `vcf-${randomUUID()}.vcf`);
 
             await fs.writeFile(
                 filePath,
@@ -136,19 +152,16 @@ export default {
                         '📇 *MEGA MD — GROUP CONTACTS*\n\n' +
                         `👥 Group: ${metadata.subject || 'WhatsApp Group'}\n` +
                         `✅ Verified contacts: ${contacts.length}\n` +
-                        `⏭️ Unresolved participants skipped: ${skipped}\n\n` +
-                        'Import the file into your contacts app.'
+                        `⏭️ Unresolved participants: ${skipped}`
                 },
                 { quoted: message }
             );
-
         } catch (error) {
             console.error('[VCF] Export failed:', error);
-
             await reply(
-                '❌ Failed to generate the VCF file. Please try again.'
+                '❌ Failed to export contacts: ' +
+                String(error?.message || 'Unknown error').slice(0, 200)
             ).catch(() => {});
-
         } finally {
             if (filePath) {
                 await fs.unlink(filePath).catch(() => {});
